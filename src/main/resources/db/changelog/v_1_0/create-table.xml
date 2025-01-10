@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="create_table" author="user">
+        <createSequence
+                incrementBy="1"
+                schemaName="public"
+                sequenceName="wallets_seq"
+                startValue="1"
+        />
+
+        <createTable tableName="wallets">
+            <column name="uuid" type="bigint">
+            </column>
+            <column name="amount" type="decimal"> </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>
