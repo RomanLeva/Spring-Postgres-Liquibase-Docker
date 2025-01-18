@@ -6,11 +6,14 @@ import group.demoapp.service.WalletService;
 import group.demoapp.service.dto.WalletChangeDto;
 import group.demoapp.service.dto.WalletDto;
 import group.demoapp.service.dto.WalletRegisterDto;
+import group.demoapp.util.DateTimeEvent;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -31,6 +34,11 @@ public class WalletController {
         WalletDto walletDto = walletService.getWalletById(WALLET_UUID);
 
         return ResponseEntity.ok(viewMapper.mapDtoToView(WalletViewModel.class, walletDto));
+    }
+
+    @GetMapping("/datetime")
+    public ResponseEntity<DateTimeEvent> getDateTime() {
+        return ResponseEntity.ok(new DateTimeEvent(LocalDateTime.now()));
     }
 
     @PostMapping("/register")
