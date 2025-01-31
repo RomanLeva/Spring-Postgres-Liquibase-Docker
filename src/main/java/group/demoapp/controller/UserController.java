@@ -8,6 +8,10 @@ import group.demoapp.service.dto.UserSummaryDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +33,16 @@ public class UserController {
     @GetMapping("/users_without_orders")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> allUsers = userService.getAllUsers();
+        return ResponseEntity.ok(allUsers);
+    }
+
+    @JsonView(UserView.UserSummary.class)
+    @GetMapping("/users_without_orders_pageable")
+    public ResponseEntity<List<User>> getAllUsersPageable(@RequestParam int page, @RequestParam int size) {
+        Sort sort = Sort.by(Sort.Direction.ASC, "name");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<User> allUsers = userService.getAllUsers(pageable).getContent();
         return ResponseEntity.ok(allUsers);
     }
 

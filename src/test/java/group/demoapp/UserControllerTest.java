@@ -10,15 +10,15 @@ import group.demoapp.repository.entity.Order;
 import group.demoapp.repository.entity.User;
 import group.demoapp.service.UserService;
 import group.demoapp.service.dto.UserSummaryDto;
-import jakarta.servlet.ServletException;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -31,7 +31,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -85,17 +84,42 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testGetAllUsersPageable() throws Exception {
+        User user1 = new User(1L,"John Doe", "john@example.com");
+        User user2 = new User(2L,"Jane Doe", "jane@example.com");
+        User user3 = new User(3L,"Jack Doe", "jack@example.com");
+        User user4 = new User(4L,"Jim Doe", "jim@example.com");
+        User user5 = new User(5L,"Jean Doe", "jean@example.com");
+        User user6 = new User(6L,"Juno Doe", "juno@example.com");
+
+        Page<User> userPage = new PageImpl<>(Arrays.asList(user1, user2, user3, user4, user5, user6));
+
+        when(userService.getAllUsers(any(Pageable.class))).thenReturn(userPage);
+
+        MvcResult result = mockMvc.perform(get("/api/users_without_orders_pageable?page=0&size=6"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String json = result.getResponse().getContentAsString();
+        List<UserView.UserSummary> users = objectMapper.readValue(json, new TypeReference<>(){});
+
+        assertNotNull(users);
+        assertEquals(6, users.size());
+        assertEquals("John Doe", users.get(0).getName());
+        assertEquals("Juno Doe", users.get(5).getName());
+    }
+
+    @Test
     public void testGetUserByIdWithUserOrders() throws Exception {
         User user = new User(1L, "John Doe", "john@example.com");
         Order order = new Order(1L, "Boiler", "Shipping", 4000, user);
         user.addOrder(order);
 
         when(userService.getUserById(1L)).thenReturn(user);
-        MvcResult resultOfGet = mockMvc.perform(get("/api/get_user_with_orders/1"))
+        MvcResult result = mockMvc.perform(get("/api/get_user_with_orders/1"))
                 .andExpect(status().isOk())
                 .andReturn();
-        String jsonOfGet = resultOfGet.getResponse().getContentAsString();
-        UserView.UserDetails gotUser = objectMapper.readValue(jsonOfGet, UserView.UserDetails.class);
+        String json = result.getResponse().getContentAsString();
+        UserView.UserDetails gotUser = objectMapper.readValue(json, UserView.UserDetails.class);
 
         assertNotNull(gotUser);
         assertEquals("John Doe", gotUser.getName());
