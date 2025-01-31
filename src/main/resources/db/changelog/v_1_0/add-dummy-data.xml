@@ -17,5 +17,33 @@
             <column name="uuid" valueSequenceNext="wallets_seq"> </column>
             <column name="amount" value="1000"> </column>
         </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="users_seq"> </column>
+            <column name="email" value="myemail@mail.ru"> </column>
+            <column name="name" value="Roma"> </column>
+        </insert>
+
+        <insert tableName="orders">
+            <column name="id" valueSequenceNext="orders_seq"> </column>
+            <column name="info" value="Boiler"> </column>
+            <column name="status" value="Shipping"> </column>
+            <column name="sum" value="4000"> </column>
+            <column name="user_id" value="1"> </column>
+        </insert>
+        <insert tableName="orders">
+            <column name="id" valueSequenceNext="orders_seq"> </column>
+            <column name="info" value="Plates"> </column>
+            <column name="status" value="Shipping"> </column>
+            <column name="sum" value="1000"> </column>
+            <column name="user_id" value="1"> </column>
+        </insert>
+        <insert tableName="orders">
+            <column name="id" valueSequenceNext="orders_seq"> </column>
+            <column name="info" value="Drill"> </column>
+            <column name="status" value="Shipping"> </column>
+            <column name="sum" value="6000"> </column>
+            <column name="user_id" value="1"> </column>
+        </insert>
     </changeSet>
 </databaseChangeLog>

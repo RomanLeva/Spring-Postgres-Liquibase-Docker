@@ -11,11 +11,36 @@
                 sequenceName="wallets_seq"
                 startValue="1"
         />
-
         <createTable tableName="wallets">
             <column name="uuid" type="bigint">
             </column>
             <column name="amount" type="decimal"> </column>
+        </createTable>
+
+        <createSequence
+                incrementBy="1"
+                schemaName="public"
+                sequenceName="users_seq"
+                startValue="1"
+        />
+        <createTable tableName="users">
+            <column name="id" type="bigint"> </column>
+            <column name="name" type="varchar"> </column>
+            <column name="email" type="varchar"> </column>
+        </createTable>
+
+        <createSequence
+                incrementBy="1"
+                schemaName="public"
+                sequenceName="orders_seq"
+                startValue="1"
+        />
+        <createTable tableName="orders">
+            <column name="id" type="bigint"> </column>
+            <column name="info" type="varchar"> </column>
+            <column name="status" type="varchar"> </column>
+            <column name="sum" type="varchar"> </column>
+            <column name="user_id" type="bigint"> </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>
