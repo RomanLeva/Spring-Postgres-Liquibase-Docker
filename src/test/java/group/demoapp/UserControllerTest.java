@@ -1,13 +1,16 @@
 package group.demoapp;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import group.demoapp.aspect.exception.UserException;
 import group.demoapp.controller.UserController;
 import group.demoapp.controller.view.UserView;
 import group.demoapp.repository.entity.Order;
+import group.demoapp.repository.entity.OrderProjection;
 import group.demoapp.repository.entity.User;
+import group.demoapp.repository.entity.UserProjection;
 import group.demoapp.service.UserService;
 import group.demoapp.service.dto.UserSummaryDto;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +28,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,8 +65,8 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsers() throws Exception {
-        User user1 = new User(1L,"John Doe", "john@example.com");
-        User user2 = new User(2L,"Jane Doe", "jane@example.com");
+        User user1 = new User(1L, "John Doe", "john@example.com");
+        User user2 = new User(2L, "Jane Doe", "jane@example.com");
 
         when(userService.getAllUsers()).thenReturn(Arrays.asList(user1, user2));
 
@@ -70,7 +74,8 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String json = result.getResponse().getContentAsString();
-        List<UserView.UserSummary> users = objectMapper.readValue(json, new TypeReference<>(){});
+        List<UserView.UserSummary> users = objectMapper.readValue(json, new TypeReference<>() {
+        });
 
         assertNotNull(users);
         assertEquals(2, users.size());
@@ -85,12 +90,12 @@ public class UserControllerTest {
 
     @Test
     public void testGetAllUsersPageable() throws Exception {
-        User user1 = new User(1L,"John Doe", "john@example.com");
-        User user2 = new User(2L,"Jane Doe", "jane@example.com");
-        User user3 = new User(3L,"Jack Doe", "jack@example.com");
-        User user4 = new User(4L,"Jim Doe", "jim@example.com");
-        User user5 = new User(5L,"Jean Doe", "jean@example.com");
-        User user6 = new User(6L,"Juno Doe", "juno@example.com");
+        User user1 = new User(1L, "John Doe", "john@example.com");
+        User user2 = new User(2L, "Jane Doe", "jane@example.com");
+        User user3 = new User(3L, "Jack Doe", "jack@example.com");
+        User user4 = new User(4L, "Jim Doe", "jim@example.com");
+        User user5 = new User(5L, "Jean Doe", "jean@example.com");
+        User user6 = new User(6L, "Juno Doe", "juno@example.com");
 
         Page<User> userPage = new PageImpl<>(Arrays.asList(user1, user2, user3, user4, user5, user6));
 
@@ -100,7 +105,8 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         String json = result.getResponse().getContentAsString();
-        List<UserView.UserSummary> users = objectMapper.readValue(json, new TypeReference<>(){});
+        List<UserView.UserSummary> users = objectMapper.readValue(json, new TypeReference<>() {
+        });
 
         assertNotNull(users);
         assertEquals(6, users.size());
@@ -175,7 +181,7 @@ public class UserControllerTest {
 
     @Test
     public void testDeleteUser() throws Exception {
-        doNothing().when(userService).deleteUser (1L);
+        doNothing().when(userService).deleteUser(1L);
 
         MvcResult result = mockMvc.perform(delete("/api/delete_user/1"))
                 .andExpect(status().isOk())
@@ -215,5 +221,63 @@ public class UserControllerTest {
                 .andReturn();
     }
 
+    @Test
+    public void testUserProjection() throws Exception {
+        UserProjection userProjection = new UserProjection() {
+            @Override
+            public String getName() {
+                return "Roma";
+            }
+
+            @Override
+            public String getEmail() {
+                return "roma@example.com";
+            }
+
+            @Override
+            public List<OrderProjection> getOrders() {
+                OrderProjection orderProjection = new OrderProjection() {
+
+                    @Override
+                    public String getInfo() {
+                        return "Bike";
+                    }
+
+                    @Override
+                    public String getStatus() {
+                        return "Shipping";
+                    }
+
+                    @Override
+                    public Integer getSum() {
+                        return 10000;
+                    }
+                };
+                return List.of(orderProjection);
+            }
+        };
+        when(userService.getUserByName(any())).thenReturn(userProjection);
+        MvcResult result = mockMvc.perform(get("/api/user_projection?name=roma"))
+                .andExpect(status().isOk())
+                .andReturn();
+        String jsonString = result.getResponse().getContentAsString();
+
+
+        // Парсим JSON-строку в JsonNode
+        JsonNode jsonNode = objectMapper.readTree(jsonString);
+
+        // Извлекаем name
+        String name = jsonNode.get("name").asText();
+        String info = "";
+
+        // Извлекаем info из первого заказа
+        JsonNode ordersNode = jsonNode.get("orders");
+        if (ordersNode.isArray() && ordersNode.size() > 0) {
+            info = ordersNode.get(0).get("info").asText();
+        }
+
+        assertEquals("Roma", name);
+        assertEquals(info, "Bike");
+    }
 }
 

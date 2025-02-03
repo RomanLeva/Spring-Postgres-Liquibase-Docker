@@ -3,6 +3,7 @@ package group.demoapp.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import group.demoapp.controller.view.UserView;
 import group.demoapp.repository.entity.User;
+import group.demoapp.repository.entity.UserProjection;
 import group.demoapp.service.UserService;
 import group.demoapp.service.dto.UserSummaryDto;
 import jakarta.validation.Valid;
@@ -26,6 +27,11 @@ public class UserController {
     @Getter
     public static class ControllerResponse {
         private String responseMessage;
+    }
+
+    @GetMapping("/user_projection")
+    public ResponseEntity<UserProjection> getUserByName(@RequestParam String name){
+        return ResponseEntity.ok(userService.getUserByName(name));
     }
 
     @JsonView(UserView.UserSummary.class)
