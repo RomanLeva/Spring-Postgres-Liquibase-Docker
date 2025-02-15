@@ -29,7 +29,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,9 +60,18 @@ public class UserControllerTest {
     @InjectMocks
     private UserController userController;
 
+    private String authHeader;
+
     @BeforeEach
     public void setUp() {
         objectMapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
+
+        String username = "USER";
+        String password = "PASSWORD";
+
+        String auth = username + ":" + password;
+        String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+        authHeader = "Basic " + encodedAuth;
     }
 
     @Test

@@ -2,15 +2,20 @@ package group.demoapp.aspect;
 
 import group.demoapp.aspect.exception.UserException;
 import group.demoapp.aspect.exception.WalletException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.HibernateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Aspect
 @ControllerAdvice
@@ -40,9 +45,25 @@ public class AppExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("VALIDATION ERROR: " + e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> handleGetRequestParameterException(MissingServletRequestParameterException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("REQUEST PARAMETER ERROR: "
-                + "Please use request string as /api/users_without_orders_pageable?page=0&size=6");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("REQUEST PARAMETER ERROR: " + e.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleJwtParameterException(MalformedJwtException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("JWT ERROR: " + "Unable to read JSON value");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException e){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("ACCESS DENIED: " + e.getMessage());
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<String> handleRuntimeException(ExpiredJwtException e){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT EXPIRED ERROR");
     }
 }
