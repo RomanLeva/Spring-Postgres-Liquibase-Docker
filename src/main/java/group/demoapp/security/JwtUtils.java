@@ -1,9 +1,6 @@
 package group.demoapp.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -21,7 +18,7 @@ public class JwtUtils {
     private SecretKey secretKey;
 
     // Время действия токена в миллисекундах (24 часа)
-    private static final long EXPIRATION_TIME = 1000000;
+    private static final long EXPIRATION_TIME = 20000;
 
     public JwtUtils() {
         // Строка, используемая для создания секретного ключа
@@ -32,7 +29,7 @@ public class JwtUtils {
     /*Метод для генерации JWT токена на основе данных пользователя*/
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userDetails.getAuthorities().stream()
+        claims.put("authorities", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList());
         return Jwts.builder().setClaims(claims)
@@ -52,7 +49,7 @@ public class JwtUtils {
     }
 
     // Метод для извлечения имени пользователя из токена
-    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) {
+    private <T> T extractClaims(String token, Function<Claims, T> claimsTFunction) throws JwtException {
         Claims body = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         return claimsTFunction.apply(body);
     }
@@ -62,7 +59,7 @@ public class JwtUtils {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    public boolean isTokenExpired(String token) throws ExpiredJwtException {
+    public boolean isTokenExpired(String token) {
         return extractClaims(token, Claims::getExpiration).before(new Date(System.currentTimeMillis()));
     }
 }

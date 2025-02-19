@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -64,6 +65,11 @@ public class AppExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> handleRuntimeException(ExpiredJwtException e){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT EXPIRED ERROR");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT TOKEN EXPIRED");
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFoundException(UsernameNotFoundException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("USER NOT FOUND");
     }
 }

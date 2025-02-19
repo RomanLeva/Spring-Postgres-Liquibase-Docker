@@ -48,9 +48,13 @@ public class SecurityConfig {
         http.addFilterBefore(loggingFilter, JwtAuthenticationFilter.class);
         http.addFilterBefore(jwtExceptionHandler, JwtAuthenticationFilter.class);
 
+//        http
+//                .requiresChannel()
+//                .anyRequest()
+//                .requiresSecure();
+
         http.authorizeHttpRequests(
                 req -> req
-                        .requestMatchers("/for_logged_user").authenticated()
                         .anyRequest().permitAll()
         );
         return http.build();
@@ -68,7 +72,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(4);
-//        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean

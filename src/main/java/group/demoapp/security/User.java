@@ -1,6 +1,7 @@
 package group.demoapp.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import group.demoapp.controller.view.UserView;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,22 +12,33 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
-@NoArgsConstructor
-@Setter
-@Getter
 @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User implements UserDetails {
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(roles.toString()));
-    }
-
-    public enum Roles {ROLE_USER, ROLE_MODERATOR, ROLE_ADMIN}
+    public enum Authorities {USER, ADMIN, MODERATOR}
 
     private String username;
     private String password;
-    private Roles roles;
+    private Authorities authorities;
     private boolean isAccountNonBlocked;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities(){
+        return List.of(new SimpleGrantedAuthority(authorities.toString()));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof User user)) return false;
+        if (Objects.equals(username, user.username)) return false;
+        if (Objects.equals(password, user.password)) return false;
+        if (Objects.equals(authorities, user.authorities)) return false;
+        return false;
+    }
 }
